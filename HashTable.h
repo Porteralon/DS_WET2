@@ -12,8 +12,10 @@
 
 #include "linkedList.h"
 #include <exception>
-template<class T,class S=int>
 
+class HashException : public std::exception{};
+
+template<class T,class S=int>
 class HashTable{
     int table_size;
     int num_of_items;
@@ -22,32 +24,38 @@ public :
     HashTable(): table_size(INITIAL_SIZE), num_of_items(0){
         table = new linkedList<T,S>[table_size];
     }
+    HashTable(int table_size): table_size(table_size), num_of_items(0){
+        table = new linkedList<T,S>[table_size];
+    }
     void expand(){
         int old_table_size = table_size;
         table_size *=2;
-        linkedList<T,S>* new_table = new linkedList<T,S>[table_size];
+        HashTable<T,S>* new_table = new HashTable<T,S>(table_size);
         for(int i=0;i<old_table_size;i++){
             node<T,S>* iterable = table[i].getHead();
             while(iterable!=nullptr){
-                new_table->insert_item(iterable->getKey(),iterable->getData());
-                *iterable=*iterable->next;
+                new_table->insertItem(iterable->getKey(),iterable->getData());
+                iterable=iterable->next;
             }
         }
         delete table;
-        table = new_table;
+        table = new_table->table;
+        delete new_table;
     };
     void decrease(){
         int old_table_size = table_size;
         table_size =table_size/2;
-        linkedList<T,S>* new_table = new linkedList<T,S>[table_size];
+        HashTable<T,S>* new_table = new HashTable<T,S>(table_size);
         for(int i=0;i<old_table_size;i++){
-            while(table[i]!=nullptr){
-                new_table->insert_item(table[i].getkey(),table[i].getData());
-                table[i]=table[i]->next;
+            node<T,S>* iterable = table[i].getHead();
+            while(iterable!= nullptr){
+                new_table->insertItem(iterable->getKey(),iterable->getData());
+                iterable=iterable->next;
             }
         }
         delete table;
-        table = new_table;
+        table = new_table->table;
+        delete new_table;
     };
     int hashFunction(T item){
         double frac = LOAD_FACTOR*double(item)-int(LOAD_FACTOR*double(item));
@@ -60,7 +68,7 @@ public :
     void insertItem(S key, T data){
         int index = hashFunction(key);
         if(table[index].Search(key)!= nullptr){
-            return; //exception
+            throw HashException();
         }
         table[index].insert_item(key,data);
         num_of_items++;
@@ -69,11 +77,11 @@ public :
     void deleteItem(S key){
         int index = hashFunction(key);
         if(!table[index].Search(key)){
-            return; // exception
+            throw HashException();
         }
-        linkedList<T,S> item_to_delete = table[index].Search(key);
+        node<T,S>* item_to_delete = table[index].Search(key);
         if(item_to_delete!=NULL){
-            item_to_delete.erase_item();
+            table[index].erase_item(item_to_delete);
         }
             num_of_items--;
             if(num_of_items==QUARTER*table_size){

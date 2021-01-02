@@ -69,6 +69,9 @@ template<class T, class S=int>
                 }
             }
         }
+        bool isEmpty(){
+            return (head== nullptr);
+        }
         node<T,S>* Search(S key){
             node<T,S>* current = head;
             while(current!=nullptr){
@@ -78,33 +81,33 @@ template<class T, class S=int>
             }
             return nullptr;
         }
-        void erase_item(){
-            if(*tail == nullptr || this == nullptr || *head==nullptr) return;
-            if(this == *tail){
+        void erase_item(node<T,S>* node_to_delete){
+            if(tail == nullptr || node_to_delete == nullptr || head==nullptr) return;
+            if(node_to_delete == tail){
                 // the node is the last one in the list
-                if(*tail==*head) {
+                if(tail==head) {
                     // the node is the only one in the list
-                    delete *this;
-                    *head = *tail = nullptr;
+                    delete node_to_delete;
+                    head = tail = nullptr;
                     return;
                 }
-                node<T,S>* prev = (*tail)->previous;
+                node<T,S>* prev = tail->previous;
                 if(prev) prev->next = nullptr;
-                *tail=prev;
-                delete this;
+                tail=prev;
+                delete node_to_delete;
                 return;
             }
-            else if(*head == this){
+            else if(head == node_to_delete){
                 // the node is the first item in the list
-                node<T,S>* next = (*head)->next;
+                node<T,S>* next = head->next;
                 if(next) next->previous = nullptr;
-                *head=next;
-                delete this;
+                head=next;
+                delete node_to_delete;
                 return;
             }
-            this->next->previous = this->previous;
-            this->previous->next = this->next;
-            delete this;
+            node_to_delete->next->previous = node_to_delete->previous;
+            node_to_delete->previous->next = node_to_delete->next;
+            delete node_to_delete;
         }
 };
 
