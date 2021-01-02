@@ -3,4 +3,4 @@ project(DS_WET2)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(DS_WET2 main2.cpp)
+add_executable(DS_WET2 main.cpp)
